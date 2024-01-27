@@ -23,7 +23,7 @@ const (
 
 type Editor struct {
 	screen tcell.Screen
-	buffer string // just a joke!
+	buffer []rune
 	mode   Mode
 	file   string
 	style  *Style
@@ -64,7 +64,7 @@ func Init() *Editor {
 
 	return &Editor{
 		screen: s,
-		buffer: "Hello there my friend",
+		buffer: []rune("Hello there my friend"),
 		mode:   MODE_NORMAL,
 		style:  style,
 		cursor: cursor,
@@ -73,7 +73,7 @@ func Init() *Editor {
 }
 
 func (ed *Editor) Run() {
-	ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, ed.buffer)
+	ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
 
 	for {
 		ed.screen.Show()
