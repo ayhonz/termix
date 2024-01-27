@@ -2,6 +2,7 @@ package editor
 
 import (
 	"log"
+	"os"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -59,7 +60,6 @@ func Init() *Editor {
 	cursor := cursor{
 		x: 1,
 		y: 1,
-
 	}
 
 	return &Editor{
@@ -72,41 +72,44 @@ func Init() *Editor {
 
 }
 
-// probably should split this one into init and run
 func (ed *Editor) Run() {
+	ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, ed.buffer)
+
 	for {
 		ed.screen.Show()
-		ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, ed.buffer)
 		ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-		event := ed.screen.PollEvent()
-
-		switch eventType := event.(type) {
-		case *tcell.EventKey:
-			if eventType.Key() == tcell.KeyCtrlC {
-				return
-			}
-			if eventType.Rune() == KEY_L { // l
-				ed.cursor.x += 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-			}
-			if eventType.Rune() == KEY_H { // h
-				ed.cursor.x -= 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-			}
-			if eventType.Rune() == KEY_J { // j
-				ed.cursor.y += 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-			}
-			if eventType.Rune() == KEY_K { // k
-				ed.cursor.y -= 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-			}
-			// mod, key, ch, name := eventType.Modifiers(), eventType.Key(), eventType.Rune(), eventType.Name()
-			// log.Fatalf("EventKey Modifiers: %d Key: %d Rune: %d, Name: %s", mod, key, ch, name)
-
-		}
+		ed.EventHandler()
 	}
 
+}
+
+func (ed *Editor) EventHandler() {
+	event := ed.screen.PollEvent()
+
+	switch eventType := event.(type) {
+	case *tcell.EventKey:
+		if eventType.Key() == tcell.KeyCtrlC {
+			ed.Quit()
+		}
+		if eventType.Rune() == KEY_L { // l
+			ed.cursor.x += 1
+			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+		}
+		if eventType.Rune() == KEY_H { // h
+			ed.cursor.x -= 1
+			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+		}
+		if eventType.Rune() == KEY_J { // j
+			ed.cursor.y += 1
+			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+		}
+		if eventType.Rune() == KEY_K { // k
+			ed.cursor.y -= 1
+			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+		}
+		// mod, key, ch, name := eventType.Modifiers(), eventType.Key(), eventType.Rune(), eventType.Name()
+		// log.Fatalf("EventKey Modifiers: %d Key: %d Rune: %d, Name: %s", mod, key, ch, name)
+	}
 }
 
 func (ed *Editor) DrawText(x1, y1, x2, y2 int, style tcell.Style, text string) {
@@ -126,12 +129,10 @@ func (ed *Editor) DrawText(x1, y1, x2, y2 int, style tcell.Style, text string) {
 }
 
 func (ed *Editor) Quit() {
-	// You have to catch panics in a defer, clean up, and
-	// re-raise them - otherwise your application can
-	// die without leaving any diagnostic trace.
 	maybePanic := recover()
-	ed.screen.Fini()
 	if maybePanic != nil {
 		panic(maybePanic)
 	}
+	ed.screen.Fini()
+	os.Exit(0)
 }
