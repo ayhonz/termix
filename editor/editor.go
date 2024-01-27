@@ -23,7 +23,7 @@ type Editor struct {
 // probably should split this one into init and run
 func (ed *Editor) Run() {
 	defStyle := tcell.StyleDefault.Background(tcell.ColorReset).Foreground(tcell.ColorReset)
-boxStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorPurple)
+	boxStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.ColorReset)
 
 	s, err := tcell.NewScreen()
 	if err != nil {
@@ -38,6 +38,9 @@ boxStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.Col
 
 	ed.screen = s
 
+	s.ShowCursor(1, 1)
+	x, y := 1, 1
+
 	for {
 		s.Show()
 		ed.DrawText(1, 1, 42, 7, boxStyle, "Hello")
@@ -48,6 +51,25 @@ boxStyle := tcell.StyleDefault.Foreground(tcell.ColorWhite).Background(tcell.Col
 			if eventType.Key() == tcell.KeyCtrlC {
 				return
 			}
+			if eventType.Rune() == 108  { // l
+				x += 1
+				s.ShowCursor(x, y)
+			}
+			if eventType.Rune() == 104  { // h 
+				x -= 1
+				s.ShowCursor(x, y)
+			}
+			if eventType.Rune() == 106  { // j 
+				y += 1
+				s.ShowCursor(x, y)
+			}
+			if eventType.Rune() == 107  { // k
+				y -= 1
+				s.ShowCursor(x, y)
+			}
+			// mod, key, ch, name := eventType.Modifiers(), eventType.Key(), eventType.Rune(), eventType.Name()
+			// log.Fatalf("EventKey Modifiers: %d Key: %d Rune: %d, Name: %s", mod, key, ch, name)
+
 		}
 	}
 
