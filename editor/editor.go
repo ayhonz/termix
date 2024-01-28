@@ -19,6 +19,7 @@ const (
 	KEY_J = 106
 	KEY_K = 107
 	KEY_L = 108
+	KEY_I = 105
 )
 
 type Editor struct {
@@ -75,6 +76,8 @@ func Init() *Editor {
 func (ed *Editor) Run() {
 	ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
 
+	ed.SetMode(MODE_NORMAL)
+
 	for {
 		ed.screen.Show()
 		ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
@@ -83,29 +86,63 @@ func (ed *Editor) Run() {
 
 }
 
+func (ed *Editor) SetMode(mode Mode) {
+	ed.mode = mode
+	var modeText string
+	if mode == MODE_EDIT {
+		modeText = "EDIT  "
+	} else {
+		modeText = "NORMAL"
+	}
+
+	x := 1
+	y := 38 //40 is the limit on my screen for now :)
+
+	for _, r := range []rune(modeText) {
+		ed.screen.SetContent(x, y, r, nil, ed.style.boxStyle)
+		x++
+	}
+}
+
 func (ed *Editor) EventHandler() {
 	event := ed.screen.PollEvent()
 
 	switch eventType := event.(type) {
 	case *tcell.EventKey:
-		if eventType.Key() == tcell.KeyCtrlC {
-			ed.Quit()
+		if ed.mode == MODE_NORMAL {
+			if eventType.Rune() == KEY_I {
+				ed.SetMode(MODE_EDIT)
+			}
+			if eventType.Rune() == KEY_L { // l
+				ed.cursor.x += 1
+				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+			}
+			if eventType.Rune() == KEY_H { // h
+				ed.cursor.x -= 1
+				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+			}
+			if eventType.Rune() == KEY_J { // j
+				ed.cursor.y += 1
+				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+			}
+			if eventType.Rune() == KEY_K { // k
+				ed.cursor.y -= 1
+				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+			}
+			if eventType.Key() == tcell.KeyCtrlC {
+				ed.Quit()
+			}
 		}
-		if eventType.Rune() == KEY_L { // l
-			ed.cursor.x += 1
-			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-		}
-		if eventType.Rune() == KEY_H { // h
-			ed.cursor.x -= 1
-			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-		}
-		if eventType.Rune() == KEY_J { // j
-			ed.cursor.y += 1
-			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
-		}
-		if eventType.Rune() == KEY_K { // k
-			ed.cursor.y -= 1
-			ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+
+		if ed.mode == MODE_EDIT {
+			if eventType.Key() == tcell.KeyCtrlC {
+				ed.Quit()
+			}
+			if eventType.Key() == tcell.KeyESC {
+				ed.SetMode(MODE_NORMAL)
+			}
+			ed.buffer = append(ed.buffer, eventType.Rune())
+			ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
 		}
 		// mod, key, ch, name := eventType.Modifiers(), eventType.Key(), eventType.Rune(), eventType.Name()
 		// log.Fatalf("EventKey Modifiers: %d Key: %d Rune: %d, Name: %s", mod, key, ch, name)
