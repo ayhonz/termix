@@ -8,11 +8,11 @@ This project uses only one external package tcell for easier manipulation with t
 ## Requirements/features:
 - [] load file
 - [] save file
-- [] basic movement around text (VIM like)
+- [x] basic movement around text (VIM like)
 - [] insert
 - [] delete
 - [] selection
-- [] mode switching (edit, normal)
+- [x] mode switching (edit, normal)
 - [] support for mouse
 
 If I'll be brave enough ;)

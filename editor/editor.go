@@ -112,6 +112,7 @@ func (ed *Editor) EventHandler() {
 		if ed.mode == MODE_NORMAL {
 			if eventType.Rune() == KEY_I {
 				ed.SetMode(MODE_EDIT)
+				return
 			}
 			if eventType.Rune() == KEY_L { // l
 				ed.cursor.x += 1
@@ -140,6 +141,7 @@ func (ed *Editor) EventHandler() {
 			}
 			if eventType.Key() == tcell.KeyESC {
 				ed.SetMode(MODE_NORMAL)
+				return
 			}
 			ed.buffer = append(ed.buffer, eventType.Rune())
 			ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
