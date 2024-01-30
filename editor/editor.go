@@ -86,7 +86,7 @@ func (ed *Editor) Run() {
 
 }
 
-func (ed *Editor) SetMode(mode Mode) {
+func (ed *Editor) SetMode(mode Mode) { // is there a union type?
 	ed.mode = mode
 	var modeText string
 	if mode == MODE_EDIT {
@@ -117,21 +117,26 @@ func (ed *Editor) EventHandler() {
 			if eventType.Rune() == KEY_L { // l
 				ed.cursor.x += 1
 				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				return
 			}
 			if eventType.Rune() == KEY_H { // h
 				ed.cursor.x -= 1
 				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				return
 			}
 			if eventType.Rune() == KEY_J { // j
 				ed.cursor.y += 1
 				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				return
 			}
 			if eventType.Rune() == KEY_K { // k
 				ed.cursor.y -= 1
 				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				return
 			}
 			if eventType.Key() == tcell.KeyCtrlC {
 				ed.Quit()
+				return
 			}
 		}
 
