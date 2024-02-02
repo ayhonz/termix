@@ -72,3 +72,35 @@ func TestInsertMid(t *testing.T) {
 		t.Errorf("Insert did not set pieces correctly. Expected 3 got %d", len(pt.pieces))
 	}
 }
+
+func TestStringMid(t *testing.T) {
+	origin := []rune("Hello, world!")
+	pt := NewPieceTable(origin)
+	expectedAdd := " there"
+	pt.Insert(expectedAdd, 5)
+	expected := "Hello there, world!"
+	if pt.String() != expected {
+		t.Errorf("String() did not return expected value. Expected '%s' got '%s'", expected, pt.String())
+	}
+}
+
+func TestStringStart(t *testing.T) {
+	origin := []rune("there, world!")
+	pt := NewPieceTable(origin)
+	expectedAdd := "Hello "
+	pt.Insert(expectedAdd, 0)
+	expected := "Hello there, world!"
+	if pt.String() != expected {
+		t.Errorf("String() did not return expected value. Expected '%s' got '%s'", expected, pt.String())
+	}
+}
+func TestStringEnd(t *testing.T) {
+	origin := []rune("Hello there")
+	pt := NewPieceTable(origin)
+	expectedAdd := ", world!"
+	pt.Insert(expectedAdd, 11)
+	expected := "Hello there, world!"
+	if pt.String() != expected {
+		t.Errorf("String() did not return expected value. Expected '%s' got '%s'", expected, pt.String())
+	}
+}

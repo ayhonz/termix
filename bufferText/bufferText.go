@@ -28,19 +28,19 @@ func (pt *PieceTable) Insert(r string, index int) {
 			end:       len(pt.add),
 		}, Piece{
 			pieceType: "origin",
-			start:     len(pt.add),
-			end:       len(pt.add) + len(pt.origin),
+			start:     0,
+			end:       len(pt.origin),
 		})
 		return
 	} else if index == len(pt.origin) {
 		pt.pieces = append(pt.pieces, Piece{
 			pieceType: "origin",
 			start:     0,
-			end:       len(pt.add),
+			end:       len(pt.origin),
 		}, Piece{
 			pieceType: "add",
 			start:     index,
-			end:       len(pt.add) + len(pt.origin),
+			end:       index + len(pt.add),
 		})
 		return
 	} else {
@@ -57,10 +57,25 @@ func (pt *PieceTable) Insert(r string, index int) {
 		endPiece := Piece{
 			pieceType: "origin",
 			start:     index,
-			end:       len(pt.add) + len(pt.origin),
+			end:       len(pt.origin),
 		}
 		pt.pieces = append(pt.pieces, startPiece, addPiece, endPiece)
 
 	}
 
+}
+
+func (pt *PieceTable) String() string {
+	var s []rune
+	for _, p := range pt.pieces {
+		if p.pieceType == "origin" {
+			e := pt.origin[p.start:p.end]
+			s = append(s, e...)
+		}
+		if p.pieceType == "add" {
+			s = append(s, pt.add...)
+		}
+	}
+
+	return string(s)
 }
