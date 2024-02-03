@@ -29,6 +29,8 @@ type Editor struct {
 	file   string
 	style  *Style
 	cursor cursor
+	height int
+	width  int
 }
 
 type Style struct {
@@ -63,20 +65,24 @@ func Init() *Editor {
 		y: 1,
 	}
 
+	width, height := s.Size()
+
 	return &Editor{
 		screen: s,
 		buffer: []rune("Hello there my friend"),
 		mode:   MODE_NORMAL,
 		style:  style,
 		cursor: cursor,
+		height: height,
+		width:  width,
 	}
-
 }
 
 func (ed *Editor) Run() {
-	ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
+	// ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
 
-	ed.SetMode(MODE_NORMAL)
+	// ed.SetMode(MODE_NORMAL)
+	ed.DrawLines()
 
 	for {
 		ed.screen.Show()
@@ -84,6 +90,25 @@ func (ed *Editor) Run() {
 		ed.EventHandler()
 	}
 
+}
+
+func (ed *Editor) MoveCursor(x, y int) {
+	if ed.width <= x || x <= 0 {
+		return
+	} else if ed.height <= y || y < 0 {
+		return
+	}
+
+	ed.cursor.x = x
+	ed.cursor.y = y
+	ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+}
+
+func (ed *Editor) DrawLines() {
+	line := '~'
+	for i := 0; i < ed.height; i++ {
+		ed.screen.SetContent(0, i, line, nil, ed.style.boxStyle)
+	}
 }
 
 func (ed *Editor) SetMode(mode Mode) { // is there a union type?
@@ -115,23 +140,19 @@ func (ed *Editor) EventHandler() {
 				return
 			}
 			if eventType.Rune() == KEY_L { // l
-				ed.cursor.x += 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				ed.MoveCursor(ed.cursor.x+1, ed.cursor.y)
 				return
 			}
 			if eventType.Rune() == KEY_H { // h
-				ed.cursor.x -= 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				ed.MoveCursor(ed.cursor.x-1, ed.cursor.y)
 				return
 			}
 			if eventType.Rune() == KEY_J { // j
-				ed.cursor.y += 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				ed.MoveCursor(ed.cursor.x, ed.cursor.y+1)
 				return
 			}
 			if eventType.Rune() == KEY_K { // k
-				ed.cursor.y -= 1
-				ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
+				ed.MoveCursor(ed.cursor.x, ed.cursor.y-1)
 				return
 			}
 			if eventType.Key() == tcell.KeyCtrlC {
