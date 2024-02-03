@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"fmt"
 	"log"
 	"os"
 
@@ -8,6 +9,8 @@ import (
 )
 
 type Mode uint8
+
+const VERSION = "0.0.1"
 
 const (
 	MODE_NORMAL Mode = iota
@@ -82,7 +85,7 @@ func (ed *Editor) Run() {
 	// ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
 
 	// ed.SetMode(MODE_NORMAL)
-	ed.DrawLines()
+	ed.DrawRows()
 
 	for {
 		ed.screen.Show()
@@ -104,10 +107,18 @@ func (ed *Editor) MoveCursor(x, y int) {
 	ed.screen.ShowCursor(ed.cursor.x, ed.cursor.y)
 }
 
-func (ed *Editor) DrawLines() {
-	line := '~'
+func (ed *Editor) DrawRows() {
 	for i := 0; i < ed.height; i++ {
-		ed.screen.SetContent(0, i, line, nil, ed.style.boxStyle)
+
+		if i == ed.height/3 {
+			welcome := fmt.Sprintf("Terminx Editor -- version %s", VERSION)
+			padding := (ed.width - len(welcome)) / 2
+			for _, s := range welcome {
+				ed.screen.SetContent(padding, i, s, nil, ed.style.boxStyle)
+				padding += 1
+			}
+		}
+		ed.screen.SetContent(0, i, '~', nil, ed.style.boxStyle)
 	}
 }
 
