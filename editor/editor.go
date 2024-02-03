@@ -1,6 +1,7 @@
 package editor
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
@@ -28,8 +29,9 @@ const (
 type Editor struct {
 	screen tcell.Screen
 	buffer []rune
+	numRow int
 	mode   Mode
-	file   string
+	file   os.File
 	style  *Style
 	cursor cursor
 	height int
@@ -68,11 +70,32 @@ func Init() *Editor {
 		y: 1,
 	}
 
+	var buffer string
+
 	width, height := s.Size()
+
+	if len(os.Args) > 1 {
+
+		fileName := os.Args[1]
+
+		file, err := os.Open(fileName)
+		if err != nil {
+			log.Fatalf("failed to open: %s with error %v", fileName, err)
+		}
+		defer file.Close()
+
+		scanner := bufio.NewScanner(file)
+
+		for scanner.Scan() {
+			buffer = scanner.Text()
+
+		}
+	}
 
 	return &Editor{
 		screen: s,
-		buffer: []rune("Hello there my friend"),
+		numRow: 1,
+		buffer: []rune(buffer),
 		mode:   MODE_NORMAL,
 		style:  style,
 		cursor: cursor,
@@ -82,8 +105,6 @@ func Init() *Editor {
 }
 
 func (ed *Editor) Run() {
-	// ed.DrawText(1, 1, 42, 7, ed.style.boxStyle, string(ed.buffer))
-
 	// ed.SetMode(MODE_NORMAL)
 	ed.DrawRows()
 
@@ -96,7 +117,7 @@ func (ed *Editor) Run() {
 }
 
 func (ed *Editor) MoveCursor(x, y int) {
-	if ed.width <= x || x <= 0 {
+	if ed.width <= x || x < 0 {
 		return
 	} else if ed.height <= y || y < 0 {
 		return
@@ -108,17 +129,26 @@ func (ed *Editor) MoveCursor(x, y int) {
 }
 
 func (ed *Editor) DrawRows() {
-	for i := 0; i < ed.height; i++ {
-
-		if i == ed.height/3 {
-			welcome := fmt.Sprintf("Terminx Editor -- version %s", VERSION)
-			padding := (ed.width - len(welcome)) / 2
-			for _, s := range welcome {
-				ed.screen.SetContent(padding, i, s, nil, ed.style.boxStyle)
-				padding += 1
+	for y := 0; y < ed.height; y++ {
+		if y >= ed.numRow {
+			if ed.numRow == 0 && y == ed.height/3 {
+				welcome := fmt.Sprintf("Terminx Editor -- version %s", VERSION)
+				padding := (ed.width - len(welcome)) / 2
+				for _, s := range welcome {
+					ed.screen.SetContent(padding, y, s, nil, ed.style.boxStyle)
+					padding += 1
+				}
+			}
+			ed.screen.SetContent(0, y, '~', nil, ed.style.boxStyle)
+		} else {
+			buffLen := len(ed.buffer)
+			if buffLen > ed.width {
+				buffLen = ed.width
+			}
+			for s := 0; s < buffLen; s++ {
+				ed.screen.SetContent(s, y, ed.buffer[s], nil, ed.style.boxStyle)
 			}
 		}
-		ed.screen.SetContent(0, i, '~', nil, ed.style.boxStyle)
 	}
 }
 
